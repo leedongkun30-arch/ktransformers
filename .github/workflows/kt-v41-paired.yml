@@ -1,0 +1,37 @@
+name: Paired KT V4.1 validation
+on:
+  push:
+    branches: [ci/kt-v41-paired]
+permissions:
+  contents: read
+jobs:
+  model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: kvcache-ai/transformers
+          ref: 6a356187deff1da8037fc0d6ee657bdb42630611
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m pip install -e . pytest parameterized pytest-timeout sentencepiece protobuf accelerate safetensors
+      - run: python -m pytest --noconftest -q tests/models/deepseek_v41/test_modeling_deepseek_v41.py
+        env:
+          OMP_NUM_THREADS: '2'
+          HF_HUB_OFFLINE: '1'
+  arm-build:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: f78402200d712c8f226f75bc748105401d732fef
+          persist-credentials: false
+      - run: git submodule update --init --depth 1 third_party/llama.cpp third_party/pybind11
+      - run: sudo apt-get update -qq && sudo apt-get install -y libhwloc-dev libnuma-dev ninja-build
+      - run: cmake -S kt-kernel -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DKTRANSFORMERS_CPU_ARM_SFT=ON -DKTRANSFORMERS_CPU_ARM_SFT_NATIVE_GEMM256=ON
+      - run: cmake --build build --target kt_kernel_ext --parallel 2
