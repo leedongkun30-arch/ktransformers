@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
-      - run: python -m pip install -e . pytest parameterized pytest-timeout sentencepiece protobuf accelerate safetensors
+      - run: python -m pip install -e . pytest parameterized pytest-timeout sentencepiece protobuf accelerate safetensors datasets scipy pillow
       - run: python -m pytest --noconftest -q tests/models/deepseek_v41/test_modeling_deepseek_v41.py
         env:
           OMP_NUM_THREADS: '2'
