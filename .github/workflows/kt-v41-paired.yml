@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: kvcache-ai/transformers
-          ref: 6a356187deff1da8037fc0d6ee657bdb42630611
+          ref: 4dba3da269be6d8db0a1f3e4135338555e3d745d
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
